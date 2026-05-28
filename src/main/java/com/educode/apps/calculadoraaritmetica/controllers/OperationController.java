@@ -56,40 +56,28 @@ public class OperationController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<Operation>> history(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
+    public ResponseEntity<List<Operation>> getHistory(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
-        
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
 
-        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
-                Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Usuario usuario = usuarioService.getUsuarioByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        List<Operation> operationList = this.operationService.history(usuario.getId(), pageable)
-                .getContent().stream()
-                .map(operation -> setUserIdOperationList(operation, usuario.getId()))
+        List<Operation> operations;
+
+        if (page != null && size != null) {
+            Sort sort = direction.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+            operations = operationService.history(usuario.getId(), pageable).getContent();
+        } else {
+            operations = operationService.history(usuario.getId());
+        }
+        List<Operation> result = operations.stream()
+                .map(op -> setUserIdOperationList(op, usuario.getId()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(operationList);
-    }
-
-    @GetMapping("/history/all")
-    public ResponseEntity<List<Operation>> listAll() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
-
-        List<Operation> operationList = this.operationService.history(usuario.getId())
-                .stream()
-                .map(operation -> setUserIdOperationList(operation, usuario.getId()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(operationList);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/history/{id}")
