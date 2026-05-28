@@ -23,8 +23,7 @@ import java.sql.Timestamp;
 @Service
 public class AuthServiceImpl implements AuthService{
 
-    @Value("${application.security.password-default}")
-    private String defaultPassword;
+    private final String defaultPassword;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final UsuarioRepository usuarioRepository;
@@ -35,12 +34,14 @@ public class AuthServiceImpl implements AuthService{
             , JwtProvider jwtProvider
             , UsuarioRepository usuarioRepository
             , EmailValidationService emailValidationService
-            , PasswordEncoder passwordEncoder) {
+            , PasswordEncoder passwordEncoder
+            , @Value("${application.security.password-default}") String defaultPassword) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.usuarioRepository = usuarioRepository;
         this.emailValidationService = emailValidationService;
         this.passwordEncoder = passwordEncoder;
+        this.defaultPassword = defaultPassword;
     }
 
     @Override
