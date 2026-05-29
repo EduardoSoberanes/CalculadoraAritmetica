@@ -1,4 +1,4 @@
-# CalculadoraAritmetica
+0000000000000# CalculadoraAritmetica
 
 Este proyecto es una API RESTful para realizar operaciones aritméticas básicas y mantener un historial de las mismas, con autenticación de usuarios y validación de emails.
 
@@ -39,24 +39,27 @@ Para levantar el proyecto localmente, sigue estos pasos:
     Abre el archivo `src/main/resources/application.properties` y ajusta las siguientes propiedades:  
 
     ```properties
+    spring.application.name=CalculadoraAritmetica
+    logging.level.org.springframework.security=DEBUG
+    
     # Configuración de la base de datos MySQL
-    spring.datasource.url=jdbc:mysql://localhost:3306/calculadora_aritmetica?useSSL=false&serverTimezone=UTC
-    spring.datasource.username=root
-    spring.datasource.password=tu_password_mysql
+    spring.datasource.url=${DB_URL}
+    spring.datasource.username=${DB_USER}
+    spring.datasource.password=${DB_PASSWORD}
     spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
     spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
     spring.jpa.show-sql=true
-    spring.jpa.hibernate.ddl-auto=update # 'update' para que Hibernate cree/actualice el esquema automáticamente
+    spring.jpa.hibernate.ddl-auto=update 
 
     # Configuración de seguridad (JWT)
-    application.security.secret-key=tu_clave_secreta_para_jwt # ¡CAMBIA ESTO POR UNA CLAVE FUERTE!
-    application.security.expiration=10800000 # Tiempo de expiración del token en milisegundos (3 horas)
-    application.security.password-default=tu_password_default_para_registro # Contraseña por defecto para el registro
+    application.security.expiration=10800000
+    application.security.secret-key=${JWT_SECRET}
+    application.security.password-default=${PASSWORD_DEFAULT}
 
     # Configuración de la API externa Mailboxlayer
-    api.mailboxlayer.key = TU_API_KEY_DE_MAILBOXLAYER # Reemplaza con tu API Key real
+    api.mailboxlayer.key=${MAIL_API_KEY}
     ```
-    **Nota**: Asegúrate de que tu base de datos MySQL esté corriendo y que las credenciales sean correctas (configura las credenciales a las de tu base de datos local o servicio de base de datos). El valor `ddl-auto=update` creará las tablas necesarias si no existen. 
+    **Nota**: Asegúrate de que tu base de datos MySQL esté corriendo y que las credenciales sean correctas (configure las variables de entorno en su sistema para poder acceder a ellas). El valor `ddl-auto=update` creará las tablas necesarias si no existen.
 
       
 4.  **Compilar y ejecutar el proyecto**:  
