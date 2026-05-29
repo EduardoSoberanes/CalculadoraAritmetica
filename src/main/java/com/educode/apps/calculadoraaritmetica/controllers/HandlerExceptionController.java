@@ -1,9 +1,11 @@
 package com.educode.apps.calculadoraaritmetica.controllers;
 
+import com.educode.apps.calculadoraaritmetica.exceptions.EmailDuplicateException;
 import com.educode.apps.calculadoraaritmetica.exceptions.EmailInvalidException;
 import com.educode.apps.calculadoraaritmetica.exceptions.MailBoxConnectionException;
 import com.educode.apps.calculadoraaritmetica.exceptions.OperationNotFoundException;
 import com.educode.apps.calculadoraaritmetica.models.dtos.ErrorDTO;
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,6 +23,17 @@ public class HandlerExceptionController {
         error.setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
         error.setMessage(ex.getMessage());
         error.setDetails("Disposable email addresses are not allowed");
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(EmailDuplicateException.class)
+    public ResponseEntity<ErrorDTO> emailDuplicated(Exception ex) {
+
+        ErrorDTO error = new ErrorDTO();
+        error.setStatus(String.valueOf(HttpStatus.BAD_REQUEST.value()));
+        error.setMessage(ex.getMessage());
+        error.setDetails("Email already exist in the database");
 
         return ResponseEntity.badRequest().body(error);
     }

@@ -1,5 +1,6 @@
 package com.educode.apps.calculadoraaritmetica.security.services;
 
+import com.educode.apps.calculadoraaritmetica.exceptions.EmailDuplicateException;
 import com.educode.apps.calculadoraaritmetica.exceptions.EmailInvalidException;
 import com.educode.apps.calculadoraaritmetica.models.dtos.UsuarioDTO;
 import com.educode.apps.calculadoraaritmetica.models.dtos.auth.AuthenticationRequest;
@@ -60,6 +61,8 @@ public class AuthServiceImpl implements AuthService{
     public RegisterResponse register(RegisterRequest registerRequest) {
         if (!emailValidationService.isEmailValid(registerRequest.getEmail()))
             throw new EmailInvalidException("Email validation failed");
+        if (this.usuarioRepository.findByEmail(registerRequest.getEmail()).isPresent())
+            throw new EmailDuplicateException("Email already registered");
 
         String password = registerRequest.getPassword().concat(defaultPassword);
 

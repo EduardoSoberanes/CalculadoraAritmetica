@@ -8,13 +8,13 @@ import com.educode.apps.calculadoraaritmetica.services.UsuarioService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -49,9 +49,9 @@ public class OperationController {
         Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
 
         Operation operation = this.operationService.operationDetail(id);
-        operation.setUserId(String.valueOf(usuario.getId()));
-
-        return ResponseEntity.ok(operation);
+        if (operation.getUserId().equals(String.valueOf(usuario.getId())))
+            return ResponseEntity.ok(operation);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
     }
 
@@ -73,11 +73,8 @@ public class OperationController {
         } else {
             operations = operationService.history(usuario.getId());
         }
-        List<Operation> result = operations.stream()
-                .map(op -> setUserIdOperationList(op, usuario.getId()))
-                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(operations);
     }
 
     @DeleteMapping("/history/{id}")
@@ -86,8 +83,4 @@ public class OperationController {
         return ResponseEntity.noContent().build();
     }
 
-    private Operation setUserIdOperationList(Operation operation, Long userId) {
-        operation.setUserId(String.valueOf(userId));
-        return operation;
-    }
 }
