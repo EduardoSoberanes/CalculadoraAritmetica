@@ -1,4 +1,4 @@
-0000000000000# CalculadoraAritmetica
+# CalculadoraAritmetica
 
 Este proyecto es una API RESTful para realizar operaciones aritméticas básicas y mantener un historial de las mismas, con autenticación de usuarios y validación de emails.
 
