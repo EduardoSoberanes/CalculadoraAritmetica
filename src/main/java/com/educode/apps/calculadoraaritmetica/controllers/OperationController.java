@@ -5,6 +5,7 @@ import com.educode.apps.calculadoraaritmetica.models.entities.Operation;
 import com.educode.apps.calculadoraaritmetica.models.entities.Usuario;
 import com.educode.apps.calculadoraaritmetica.services.OperationService;
 import com.educode.apps.calculadoraaritmetica.services.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api")
 public class OperationController {
@@ -28,6 +30,7 @@ public class OperationController {
         this.usuarioService = usuarioService;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Calculate operation")
     @PostMapping("/calculate")
     public ResponseEntity<Operation> calculate(@RequestBody CalculationDTO calculationDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,6 +45,7 @@ public class OperationController {
         return ResponseEntity.ok(this.operationService.doOperation(usuario, operation));
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Get a operation by id")
     @GetMapping("/history/{id}")
     public ResponseEntity<Operation> historyById(@PathVariable Long id) {
 
@@ -55,6 +59,7 @@ public class OperationController {
 
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "List operation history")
     @GetMapping("/history")
     public ResponseEntity<List<Operation>> getHistory(
             @RequestParam(required = false) Integer page,
@@ -77,6 +82,7 @@ public class OperationController {
         return ResponseEntity.ok(operations);
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Delete a operation by id")
     @DeleteMapping("/history/{id}")
     public ResponseEntity<Void> deleteOperation(@PathVariable Long id) {
         this.operationService.deleteOperation(id);
