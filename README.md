@@ -59,7 +59,8 @@ Para levantar el proyecto localmente, sigue estos pasos:
     # Configuración de la API externa Mailboxlayer
     api.mailboxlayer.key=${MAIL_API_KEY}
     ```
-    **Nota**: Asegúrate de que tu base de datos MySQL esté corriendo y que las credenciales sean correctas (configure las variables de entorno en su sistema para poder acceder a ellas). El valor `ddl-auto=update` creará las tablas necesarias si no existen.
+    **Nota**: Asegúrate de que tu base de datos MySQL esté corriendo y que las credenciales sean correctas (configure las variables de entorno en su sistema para poder acceder a ellas). El valor `ddl-auto=create` creará las tablas necesarias si no existen. Posteriormente cambiar la propiedad a `update`.  
+    Si la tabla no esta creada en tu base de datos local, se obtendrá una excepción al ejecutar el proyecto. Crea el schemma `calculadora_aritmetica`.
 
       
 4.  **Compilar y ejecutar el proyecto**:  
