@@ -5,17 +5,19 @@ import com.educode.apps.calculadoraaritmetica.models.entities.Operation;
 import com.educode.apps.calculadoraaritmetica.models.entities.Usuario;
 import com.educode.apps.calculadoraaritmetica.services.OperationService;
 import com.educode.apps.calculadoraaritmetica.services.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api")
 public class OperationController {
@@ -28,6 +30,7 @@ public class OperationController {
         this.usuarioService = usuarioService;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Calculate operation")
     @PostMapping("/calculate")
     public ResponseEntity<Operation> calculate(@RequestBody CalculationDTO calculationDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,6 +45,7 @@ public class OperationController {
         return ResponseEntity.ok(this.operationService.doOperation(usuario, operation));
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Get a operation by id")
     @GetMapping("/history/{id}")
     public ResponseEntity<Operation> historyById(@PathVariable Long id) {
 
@@ -49,57 +53,40 @@ public class OperationController {
         Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
 
         Operation operation = this.operationService.operationDetail(id);
-        operation.setUserId(String.valueOf(usuario.getId()));
-
-        return ResponseEntity.ok(operation);
+        if (operation.getUserId().equals(String.valueOf(usuario.getId())))
+            return ResponseEntity.ok(operation);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "List operation history")
     @GetMapping("/history")
-    public ResponseEntity<List<Operation>> history(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
+    public ResponseEntity<List<Operation>> getHistory(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
-        
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
 
-        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
-                Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Usuario usuario = usuarioService.getUsuarioByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        List<Operation> operationList = this.operationService.history(usuario.getId(), pageable)
-                .getContent().stream()
-                .map(operation -> setUserIdOperationList(operation, usuario.getId()))
-                .collect(Collectors.toList());
+        List<Operation> operations;
 
-        return ResponseEntity.ok(operationList);
+        if (page != null && size != null) {
+            Sort sort = direction.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+            operations = operationService.history(usuario.getId(), pageable).getContent();
+        } else {
+            operations = operationService.history(usuario.getId());
+        }
+
+        return ResponseEntity.ok(operations);
     }
 
-    @GetMapping("/history/all")
-    public ResponseEntity<List<Operation>> listAll() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuario = this.usuarioService.getUsuarioByEmail(authentication.getName());
-
-        List<Operation> operationList = this.operationService.history(usuario.getId())
-                .stream()
-                .map(operation -> setUserIdOperationList(operation, usuario.getId()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(operationList);
-    }
-
+    @io.swagger.v3.oas.annotations.Operation(summary = "Delete a operation by id")
     @DeleteMapping("/history/{id}")
     public ResponseEntity<Void> deleteOperation(@PathVariable Long id) {
         this.operationService.deleteOperation(id);
         return ResponseEntity.noContent().build();
     }
 
-    private Operation setUserIdOperationList(Operation operation, Long userId) {
-        operation.setUserId(String.valueOf(userId));
-        return operation;
-    }
 }

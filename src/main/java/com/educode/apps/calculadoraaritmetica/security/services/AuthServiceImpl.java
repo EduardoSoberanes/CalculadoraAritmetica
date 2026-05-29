@@ -1,5 +1,6 @@
 package com.educode.apps.calculadoraaritmetica.security.services;
 
+import com.educode.apps.calculadoraaritmetica.exceptions.EmailDuplicateException;
 import com.educode.apps.calculadoraaritmetica.exceptions.EmailInvalidException;
 import com.educode.apps.calculadoraaritmetica.models.dtos.UsuarioDTO;
 import com.educode.apps.calculadoraaritmetica.models.dtos.auth.AuthenticationRequest;
@@ -23,8 +24,7 @@ import java.sql.Timestamp;
 @Service
 public class AuthServiceImpl implements AuthService{
 
-    @Value("${application.security.password-default}")
-    private String defaultPassword;
+    private final String defaultPassword;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final UsuarioRepository usuarioRepository;
@@ -35,12 +35,14 @@ public class AuthServiceImpl implements AuthService{
             , JwtProvider jwtProvider
             , UsuarioRepository usuarioRepository
             , EmailValidationService emailValidationService
-            , PasswordEncoder passwordEncoder) {
+            , PasswordEncoder passwordEncoder
+            , @Value("${application.security.password-default}") String defaultPassword) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.usuarioRepository = usuarioRepository;
         this.emailValidationService = emailValidationService;
         this.passwordEncoder = passwordEncoder;
+        this.defaultPassword = defaultPassword;
     }
 
     @Override
@@ -59,6 +61,8 @@ public class AuthServiceImpl implements AuthService{
     public RegisterResponse register(RegisterRequest registerRequest) {
         if (!emailValidationService.isEmailValid(registerRequest.getEmail()))
             throw new EmailInvalidException("Email validation failed");
+        if (this.usuarioRepository.findByEmail(registerRequest.getEmail()).isPresent())
+            throw new EmailDuplicateException("Email already registered");
 
         String password = registerRequest.getPassword().concat(defaultPassword);
 

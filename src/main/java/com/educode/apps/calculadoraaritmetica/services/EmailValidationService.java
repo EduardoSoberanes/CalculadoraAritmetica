@@ -3,6 +3,7 @@ package com.educode.apps.calculadoraaritmetica.services;
 import com.educode.apps.calculadoraaritmetica.clients.EmailClient;
 import com.educode.apps.calculadoraaritmetica.exceptions.MailBoxConnectionException;
 import com.educode.apps.calculadoraaritmetica.models.dtos.EmailValidationResponse;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class EmailValidationService {
                     .checkEmail(this.apiKey, email);
 
             return this.isValidEmail(response);
-        } catch (MailBoxConnectionException e) {
+        } catch (FeignException e) {
             throw new MailBoxConnectionException(e.getMessage());
         }
     }

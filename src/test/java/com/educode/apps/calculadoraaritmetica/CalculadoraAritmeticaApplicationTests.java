@@ -67,12 +67,8 @@ class CalculadoraAritmeticaApplicationTests {
     private Authentication authentication;
     @InjectMocks
     private OperationController operationController;
-
-    // Handler Exception Controller
     @InjectMocks
     private HandlerExceptionController handlerExceptionController;
-
-    // Security Mocks & Services
     @Mock
     private AuthenticationManager authenticationManager;
     @Mock
@@ -81,13 +77,10 @@ class CalculadoraAritmeticaApplicationTests {
     private PasswordEncoder passwordEncoder;
     @Mock
     private EmailValidationService emailValidationServiceMock;
-
     @InjectMocks
     private AuthServiceImpl authService;
     @InjectMocks
     private UserDetailsServiceImpl userDetailsService;
-
-    // Mocks for Service tests
     @Mock
     private OperationRepository operationRepository;
     @Mock
@@ -123,7 +116,6 @@ class CalculadoraAritmeticaApplicationTests {
     void contextLoads() {
     }
 
-    // AUTH SERVICE TESTS
 
     @Test
     void testAuthService_Authenticate() {
@@ -166,8 +158,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertThrows(EmailInvalidException.class, () -> authService.register(request));
     }
 
-    // USER DETAILS SERVICE TESTS
-
     @Test
     void testUserDetails_LoadSuccess() {
         when(usuarioRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUsuario));
@@ -181,7 +171,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("none@test.com"));
     }
 
-    // JWT PROVIDER TESTS
 
     @Test
     void testJwtProvider_GenerateAndValidate() {
@@ -206,7 +195,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertFalse(provider.validateToken("invalid.token.here"));
     }
 
-    // SECURITY PROPERTIES TEST
     @Test
     void testSecurityProperties() {
         SecurityProperties props = new SecurityProperties();
@@ -217,7 +205,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertNotNull(props.toString());
     }
 
-    // CONTROLLER TESTS (Mantenidos)
 
     @Test
     void testControllerCalculate() {
@@ -243,12 +230,11 @@ class CalculadoraAritmeticaApplicationTests {
         mockOperation.setResult(new BigDecimal("15"));
         Page<Operation> page = new PageImpl<>(Collections.singletonList(mockOperation));
         when(operationServiceMock.history(anyLong(), any(Pageable.class))).thenReturn(page);
-        ResponseEntity<List<Operation>> response = operationController.history(0, 10, "timestamp", "desc");
+        ResponseEntity<List<Operation>> response = operationController.getHistory(0, 10, "timestamp", "desc");
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
     }
 
-    // OPERATION SERVICE TESTS (Mantenidos)
 
     @Test
     void testOperationService_Add() {
@@ -320,7 +306,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertThrows(IllegalArgumentException.class, () -> operationServiceImpl.doOperation(mockUsuario, op));
     }
 
-    // USUARIO SERVICE TESTS (Mantenidos)
 
     @Test
     void testUsuarioService_GetByEmail_Success() {
@@ -335,7 +320,6 @@ class CalculadoraAritmeticaApplicationTests {
         assertThrows(UsernameNotFoundException.class, () -> usuarioServiceImpl.getUsuarioByEmail("none@test.com"));
     }
 
-    // EMAIL VALIDATION SERVICE TESTS (Mantenidos)
 
     @Test
     void testEmailValidation_Valid() {
@@ -352,8 +336,6 @@ class CalculadoraAritmeticaApplicationTests {
         when(emailClient.checkEmail(anyString(), anyString())).thenThrow(new MailBoxConnectionException("Error"));
         assertThrows(MailBoxConnectionException.class, () -> emailValidationService.isEmailValid("test@example.com"));
     }
-
-    // EXCEPTION HANDLER TESTS (Mantenidos)
 
     @Test
     void testHandler_EmailInvalid() {

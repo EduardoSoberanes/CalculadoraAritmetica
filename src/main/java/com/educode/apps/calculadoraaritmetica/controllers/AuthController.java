@@ -4,8 +4,8 @@ import com.educode.apps.calculadoraaritmetica.models.dtos.auth.AuthenticationReq
 import com.educode.apps.calculadoraaritmetica.models.dtos.auth.AuthenticationResponse;
 import com.educode.apps.calculadoraaritmetica.models.dtos.auth.RegisterRequest;
 import com.educode.apps.calculadoraaritmetica.models.dtos.auth.RegisterResponse;
-import com.educode.apps.calculadoraaritmetica.models.entities.Usuario;
 import com.educode.apps.calculadoraaritmetica.security.services.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,11 +23,13 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @Operation(summary = "Register new user")
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.authService.register(registerRequest));
     }
 
+    @Operation(summary = "Login user")
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest authenticationRequest) {
         return ResponseEntity.ok(this.authService.authenticate(authenticationRequest));

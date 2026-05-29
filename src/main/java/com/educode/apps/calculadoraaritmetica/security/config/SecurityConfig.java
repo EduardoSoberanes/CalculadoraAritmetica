@@ -30,7 +30,8 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll() // Tus endpoints de login/registro
+                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers( "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html" ).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
